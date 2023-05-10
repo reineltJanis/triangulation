@@ -57,17 +57,17 @@ class Calibrator:
                 self.objpoints.append(objp)
                 corners2 = cv.cornerSubPix(gray, corners, (11,11), (-1,-1), self.criteria)
                 self.imgpoints.append(corners2)
-
+        
 
         ############## CALIBRATION #######################################################
 
-        self.calibrated, self.cameraMatrix, self.dist, self.rvecs, self.tvecs = cv.calibrateCamera(self.objpoints, self.imgpoints, self.frameSize, None, None)
+        self.ret, self.cameraMatrix, self.dist, self.rvecs, self.tvecs = cv.calibrateCamera(self.objpoints, self.imgpoints, self.frameSize, None, None)
 
         #print("ImgPoints: ", imgpoints)
 
         print('')
 
-        print("Camera calibrated: ", self.calibrated)
+        print("Camera calibrated: ", self.ret)
         print("Camera Matrix: ", self.cameraMatrix)
         print("Distortion Parameters: ", self.dist)
         print("Rotation Vectors: ", self.rvecs)
@@ -113,6 +113,19 @@ class Calibrator:
         return np.rint(self.imgpoints[index].reshape((-1,2)))
 
 
+    def draw_corners(self):
+        plt.figure(figsize=(30,20))
+        for i, img_src in enumerate(self.images):
+            # Draw and display the corners
+            img = cv.imread(img_src)
+            img = cv.resize(img, self.frameSize)
+            corners_img = cv.drawChessboardCorners(img, (9,6), self.imgpoints[i], True)
+            plt.subplot(2, 5, i+1)
+            plt.imshow(corners_img)
+            plt.axis("off")
+        
+        plt.show()
+        
 
     # Undistort with Remapping
     #mapx, mapy = cv.initUndistortRectifyMap(cameraMatrix, dist, None, newCameraMatrix, (w,h), 5)

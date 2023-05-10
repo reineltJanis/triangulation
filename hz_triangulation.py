@@ -17,9 +17,9 @@ class HZTriangulation:
     __pts1 = []
     # corresponding points right
     __pts2 = []
-    # intrinsic camera matrix left
+    # camera matrix 1 (projection matrix)
     __K = None
-    # instrinsic camera matrix right
+    # camera matrix 2 (projection matrix)
     __Kp = None
     # current x
     x = None
@@ -44,7 +44,7 @@ class HZTriangulation:
         p2 = self.__as_homogeneous(self.__pts2)
         F,mask = cv.findFundamentalMat(p1,p2)
         self.F = F
-        M, mask = cv.findHomography(p1, p2, cv.RANSAC,5.0)
+        M, mask = cv.findHomography(p1, p2, cv.RANSAC, 10.0)
         self.M = M
         return F,mask
         
@@ -95,7 +95,7 @@ class HZTriangulation:
         #print(line, res)
         return res 
 
-    def singlePointStep(self, index):
+    def single_point_step(self, index):
         self.x = self.__as_homogeneous(self.__pts1)[index]
         self.xp = self.__as_homogeneous(self.__pts2)[index]
         # (i)
@@ -274,14 +274,22 @@ class HZTriangulation:
         tmp = img.copy()
         for i in range(0,len(points)):
             point = np.int64(points[i])
-            tmp = cv.drawMarker(tmp, point, (i/8*64%256,i/4*64%256,i*64%256), markerType=cv.MARKER_STAR, markerSize=10, thickness=1, line_type=cv.LINE_AA)
+            tmp = cv.drawMarker(tmp, point, (i/8*64%256,i/4*64%256,i*64%256), markerType=cv.MARKER_STAR, markerSize=20, thickness=5, line_type=cv.LINE_AA)
         return tmp
         
     def __printableImage(self):
-        return cv.hconcat([
+        out = cv.hconcat([
             self.__drawMarkers(self.__imgL, self.__pts1),
             self.__drawMarkers(self.__imgR, self.__pts2)
         ])
+        offsetRx=self.__imgL.shape[1]
+        for i, pointL in enumerate(self.__pts1):
+            pointR = self.__pts2[i]
+            print(self.__imgL.shape)
+            pointR[0] += offsetRx
+            cv.line(out, np.int64(pointL), np.int64(pointR), (i/8*64%256,i/4*64%256,i*64%256), 5)
+
+        return out
     
     def print(self):
         out = self.__printableImage()
