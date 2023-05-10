@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
 import glob
+from src.painting import Painting
 
 
 class Calibrator:
@@ -38,6 +39,7 @@ class Calibrator:
 
 
         self.images = glob.glob(self.img_path + self.file_selector)
+        self.images.sort()
 
         for image in self.images:
 
@@ -54,7 +56,7 @@ class Calibrator:
 
                 self.objpoints.append(objp)
                 corners2 = cv.cornerSubPix(gray, corners, (11,11), (-1,-1), self.criteria)
-                self.imgpoints.append(corners)
+                self.imgpoints.append(corners2)
 
 
         ############## CALIBRATION #######################################################
@@ -80,7 +82,7 @@ class Calibrator:
         W = np.concatenate([R,t], axis=-1) # [R|t]
         K = self.cameraMatrix
         P = K.dot(W)
-        print('P for '+ self.file_selector + str(img_index))
+        print('P for '+ self.file_selector + ', index: ' + str(img_index))
         print(P)
         return P,(K,W,R,t)
 
@@ -99,6 +101,16 @@ class Calibrator:
         #x, y, w, h = roi
         #dst = dst[y:y+h, x:x+w]
         #cv.imwrite(out_path, dst)
+    
+    def plot_image(self, index, add_corners=True):
+        arr = self.imgpoints_as_int
+        painting = Painting(cv.imread(self.images[index]))
+        if add_corners:
+            painting.add_markers(arr)
+        painting.plot()
+
+    def imgpoints_as_int(self, index):
+        return np.rint(self.imgpoints[index].reshape((-1,2)))
 
 
 
