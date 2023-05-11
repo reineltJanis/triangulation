@@ -7,6 +7,17 @@ import cv2 as cv
 import glob
 from src.painting import Painting
 
+# additional_points = np.array([
+#     [[1017,1013]],
+#     [[1178,1298]],
+#     [[1592,1847]],
+#     [[2248,1774]],
+#     [[2104,661]],
+#     [[2150,666]],
+#     [[2633,1444]],
+#     [[2456,1765]],
+#     [[1321,1841]],
+#     [[766,957]]])
 
 class Calibrator:
     img_path = 'assets/calibration_new/'
@@ -148,3 +159,4 @@ class Calibrator:
     #    mean_error += error
 
     #print( "total error: {}".format(mean_error/len(objpoints)) )
+

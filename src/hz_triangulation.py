@@ -44,7 +44,7 @@ class HZTriangulation:
         p2 = self.__as_homogeneous(self.__pts2)
         F,mask = cv.findFundamentalMat(p1,p2)
         self.F = F
-        M, mask = cv.findHomography(p1, p2, cv.RANSAC, 10.0)
+        M, mask = cv.findHomography(p1, p2, cv.RANSAC, 5.0)
         self.M = M
         return F,mask
         
@@ -57,11 +57,6 @@ class HZTriangulation:
         T = np.matrix([[1,0,-self.x[0]],[0,1,-self.x[1]],[0,0,1]])
         Tp = np.matrix([[1,0,-self.xp[0]],[0,1,-self.xp[1]],[0,0,1]])
         return T,Tp
-
-    #def get_es(self, F):
-    #    _,_,v = np.linalg.svd(F)
-    #    e = v[-1]
-    #    ep = np.dot(F, e)
 
     def constructR(self, e):
         return np.matrix([[e[0,0],e[1,0],0],[-e[1,0],e[0,0],0],[0,0,1]])
@@ -193,9 +188,6 @@ class HZTriangulation:
         #print("vh: ",vh)
         #print(A.dot(vh[-1]))
         return vh[-1]/vh[-1][-1]
-    
-    def dist(self, X1, X2):
-        return np.linalg.norm(X2[:3]-X1[:3])
         
     
    
@@ -214,34 +206,6 @@ class HZTriangulation:
         assert P1.shape == P2.shape
         return P1, P2
 
-
-    def triangulation(img1, img2, pts1, pts2):
-        assert pts1.shape == pts2.shape
-        ones = np.ones((len(pts1),1))
-        #p1 = np.concatenate((pts1, ones), axis=1)
-        #p2 = np.concatenate((pts2, ones), axis=1)
-        F,mask = cv.findFundamentalMat(p1,p2,cv.FM_LMEDS)
-        #P, Pp = createProjectionMatrices(F)
-        pts1 = pts1[mask.ravel()==1]
-        pts2 = pts2[mask.ravel()==1]
-        print("Fundamental matrix F:\n",F, '\n')
-        #print([singlePointStep(F,pts1[i],pts2[i]) for i in range(0,len(pts1))])
-        hpts1 = []
-        hpts2 = []
-        res = []
-        for i in range(0,len(pts1)):
-            hx,hxp = singlePointStep(F,pts1[i],pts2[i])
-            hpts1.append(hx)
-            hpts2.append(hxp)
-            X = find_homography(hx,hxp, P,Pp)
-            res.append(X)
-            #print("X for {hx} <-> {hxp}:\nHZ: {X}".format(**locals()))
-            #print(X)
-        #print(hpts1)
-        #print("\nA:")
-        printImg(drawMarkers(imgL.copy(),pts1), drawMarkers(imgR.copy(),pts2),"assets/inlier-markers.jpg")
-        #print(A)
-        return np.matrix(res)
     def triangulateOpenCv(self):
         try:
             pts1 = self.__pts1.T
@@ -303,30 +267,30 @@ class HZTriangulation:
 def matrix_to_array(mat):
     return np.squeeze(np.asarray(mat))
 
-def find_homography(points_source, points_target):
-    A  = construct_A(points_source, points_target)
-    u, s, vh = np.linalg.svd(A, full_matrices=True)
+# def find_homography(points_source, points_target):
+#     A  = construct_A(points_source, points_target)
+#     u, s, vh = np.linalg.svd(A, full_matrices=True)
     
-    # Solution to H is the last column of V, or last row of V transpose
-    homography = vh[-1].reshape((3,3))
-    return homography/homography[2,2]
+#     # Solution to H is the last column of V, or last row of V transpose
+#     homography = vh[-1].reshape((3,3))
+#     return homography/homography[2,2]
 
-def construct_A(points_source, points_target):
-    assert points_source.shape == points_target.shape, "Shape does not match"
-    num_points = points_source.shape[0]
+# def construct_A(points_source, points_target):
+#     assert points_source.shape == points_target.shape, "Shape does not match"
+#     num_points = points_source.shape[0]
 
-    matrices = []
-    for i in range(num_points):
-        partial_A = construct_A_partial(points_source[i], points_target[i])
-        matrices.append(partial_A)
-    return np.concatenate(matrices, axis=0)
+#     matrices = []
+#     for i in range(num_points):
+#         partial_A = construct_A_partial(points_source[i], points_target[i])
+#         matrices.append(partial_A)
+#     return np.concatenate(matrices, axis=0)
 
-def construct_A_partial(point_source, point_target):
-    x, y, z = point_source[0], point_source[1], 1
-    x_t, y_t, z_t = point_target[0], point_target[1], 1
+# def construct_A_partial(point_source, point_target):
+#     x, y, z = point_source[0], point_source[1], 1
+#     x_t, y_t, z_t = point_target[0], point_target[1], 1
 
-    A_partial = np.array([
-        [0, 0, 0, -z_t*x, -z_t*y, -z_t*z, y_t*x, y_t*y, y_t*z],
-        [z_t*x, z_t*y, z_t*z, 0, 0, 0, -x_t*x, -x_t*y, -x_t*z]
-    ])
-    return A_partial
+#     A_partial = np.array([
+#         [0, 0, 0, -z_t*x, -z_t*y, -z_t*z, y_t*x, y_t*y, y_t*z],
+#         [z_t*x, z_t*y, z_t*z, 0, 0, 0, -x_t*x, -x_t*y, -x_t*z]
+#     ])
+#     return A_partial
