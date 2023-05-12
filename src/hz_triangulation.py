@@ -210,13 +210,22 @@ class HZTriangulation:
         try:
             pts1 = self.__pts1.T
             pts2 = self.__pts2.T
-            cv_res = cv.triangulatePoints(self.__K,self.__Kp,pts1,pts2)
-            #print(cv_res)
-            #for i in range(0,cv_res.shape[0]):
-            #    cv_res[i] = cv_res[i]/cv_res[i,-1]
+            cv_res = cv.triangulatePoints(self.__K,self.__Kp,pts1,pts2).T
+            for i in range(0,cv_res.shape[0]):
+                #Normalize homogeneous points
+                cv_res[i] = cv_res[i]/cv_res[i,-1]
         except:
             print("error")
         return cv_res
+    
+    def triangulate(self, verbose=False):
+        points = []
+        for i in range(0, len(self.__pts1)):
+            X = self.single_point_step(i)
+            points.append(X)
+            if verbose:
+                print("{i:2} => x:\t{self.x},\txp:\t{self.xp},\tX: {X}".format(**locals()))
+        return points
     
     # copied from other source: https://github.com/alyssaq/3Dreconstruction/blob/master/structure.py
     def compute_epipole(self, F):

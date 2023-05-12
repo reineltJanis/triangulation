@@ -10,7 +10,7 @@ def evaluate_points(points_arr, camera_centers, shape, size_mm=-1, out_file=None
     df_dists = pd.DataFrame()
     df_eval = pd.DataFrame()
     for index, points in enumerate(points_arr):
-        points = np.array(points)
+        points = np.array(points)[:,:3]
         df = evaluate_point_dists(points, size_mm)
         if index == 0:
             df_dists = df
@@ -49,8 +49,8 @@ def evaluate_points(points_arr, camera_centers, shape, size_mm=-1, out_file=None
             'area expected': area_expected,
             'area simple': area_simple,
             'area simple factor': round(area_simple / area_expected, 4),
-            'area simple invers': area_simple_i,
-            'area simple invers factor': round(area_simple_i / area_expected, 4),
+            'area simple inverse': area_simple_i,
+            'area simple inverse factor': round(area_simple_i / area_expected, 4),
             'area polygons': area_poly,
             'area polygons factor': round(area_poly / area_expected, 4),
             'C1 mean depth': np.mean(depths_arr[0]),
@@ -74,7 +74,6 @@ def evaluate_points(points_arr, camera_centers, shape, size_mm=-1, out_file=None
         df_points.to_markdown('%s-%s.md' % (out_file, 'points'), index=True)
         df_dists.to_markdown('%s-%s.md' % (out_file, 'dists'), index=False)
         df_eval.to_markdown('%s.md' % (out_file))
-        pass
 
 
 def camera_center(projection_matrix: np.ndarray) -> np.ndarray:
