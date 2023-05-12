@@ -22,7 +22,7 @@ from src.painting import Painting
 class Calibrator:
     img_path = 'assets/calibration_new/'
     
-    def __init__(self, img_path, file_selector='*.jpg', frameSize=(1600,1200), chessboardSize=(7,5), chessboard_square_mm=29.15, termination_criteria=(cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)):
+    def __init__(self, img_path, file_selector='*.jpg', frameSize=(1600,1200), chessboardSize=(7,5), chessboard_square_mm=29.15, termination_criteria=(cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 40, 0.001)):
         np.set_printoptions(precision=9,suppress=True)
         self.img_path = img_path
         self.file_selector = file_selector
@@ -66,7 +66,7 @@ class Calibrator:
             if ret == True:
 
                 self.objpoints.append(objp)
-                corners2 = cv.cornerSubPix(gray, corners, (11,11), (-1,-1), self.criteria)
+                corners2 = cv.cornerSubPix(gray, corners, (32,32), (-1,-1), self.criteria)
                 self.imgpoints.append(corners2)
         
 

@@ -10,7 +10,7 @@ def evaluate_points(points_arr, camera_centers, shape, size_mm=-1, out_file=None
     df_dists = pd.DataFrame()
     df_eval = pd.DataFrame()
     for index, points in enumerate(points_arr):
-        points = np.array(points)[:,:3]
+        points = np.array(points)[:35,:3] # take only grid
         df = evaluate_point_dists(points, size_mm)
         if index == 0:
             df_dists = df
@@ -113,13 +113,17 @@ def evaluate_point_dists(points, size_mm) -> pd.DataFrame:
     return df_dists
 
 
-def plot_3d(points, marker='o', out_file=None):
+def plot_3d(points, marker='o', out_file=None, angle=None):
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
+    if angle is not None:
+        ax.view_init(60, angle)
     xs = []
     ys = []
     zs = []
     for i, point in enumerate(points):
+        if i > 34:
+            break
         x = point[0]
         y = point[1]
         z = point[2]
